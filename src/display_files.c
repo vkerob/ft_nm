@@ -98,33 +98,70 @@ struct stat	get_file_size(int fd, const char *file)
 	return file_stat;
 }
 
-bool	display_files(const char *file)
-{
-	int			i;
-	int			fd;
-	struct stat	file_stat;
 
-	fd = open_file(file);
-	if (fd > -1)
+
+bool	open_and_get_stat_file(const char *file, int *fd, struct stat *file_stat)
+{
+	*fd = open_file(file);
+	if (*fd > -1)
 	{
-		file_stat = get_file_size(fd, file);
-		if (file_stat.st_size == 0)
+		*file_stat = get_file_size(*fd, file);
+		if ((*file_stat).st_size == 0)
 			return true;
 	}
 	else
 	{
 		if (errno == ENOENT)
 			ft_printf("ft_nm :%s: No such file\n", file);
-		else if (S_ISDIR(file_stat.st_mode))
+		else if (S_ISDIR((*file_stat).st_mode))
 			ft_printf("ft_nm :%s: is a directory\n", file);
-		else if (!S_ISREG(file_stat.st_mode))
+		else if (!S_ISREG((*file_stat).st_mode))
 			ft_printf("ft_nm :%s: is not an ordinary file\n", file);
-		close(fd);
+		close(*fd);
 		return true;
 	}
+	return false;
+}
+
+
+bool	display_files(const char *file)
+{
+	int			i;
+	int			fd;
+	struct stat	file_stat;
+	void		*file_map;
+
+	if (open_and_get_stat_file(file, &fd, &file_stat))
+		return true;
 	// read 64 bytes from the file for being sure it's an ELF file
 	// if all the file have been already mapped, we can use the mapping
 	// else we map the file
+
+	file_map = mmap(NULL, page_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (file_map == MAP_FAILED)
+	{
+		perror("Error mapping file");
+		close(fd);
+		return false;
+	}
+	ft_printf("size: %i\n", file_stat.st_size);
+	// ft_print_memory(file_map, file_stat.st_size);
+	Elf64_Ehdr *header = (Elf64_Ehdr *)file_map;
+	if (header->e_ident[EI_MAG0] != ELFMAG0 ||
+		header->e_ident[EI_MAG1] != ELFMAG1 || 
+		header->e_ident[EI_MAG2] != ELFMAG2 || 
+		header->e_ident[EI_MAG3] != ELFMAG3 ||
+		header->e_ident[EI_CLASS] != ELFCLASS64 ||
+		(header->e_type != ET_EXEC &&
+		header->e_type != ET_DYN &&
+		header->e_type != ET_REL))
+	{
+		ft_printf("type: %i\n", header->e_type);
+		ft_printf("ft_nm :%s: File format not recognized\n", file);
+		close(fd);
+		return true;
+	}
+	ft_printf("Magic: %c%c%c%c\n", header->e_ident[EI_MAG0], header->e_ident[EI_MAG1], header->e_ident[EI_MAG2], header->e_ident[EI_MAG3]);
 
 	return false;
 }

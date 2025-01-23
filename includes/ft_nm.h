@@ -15,7 +15,7 @@
 extern int	page_size;
 
 
-void	display_files(const char *file);
+bool	display_files(const char *file);
 
 
 #endif
