@@ -14,23 +14,8 @@
 
 extern int	page_size;
 
-typedef struct s_file
-{
-	char	*name;
-	int		fd;
-	struct stat file_stat;
-}   			t_file;
 
-
-typedef struct s_data
-{
-	t_file	*files;
-	size_t	file_count;
-}   			t_data;
-
-
-
-void	read_files(t_data data, int argc, const char **argv);
+void	display_files(const char *file);
 
 
 #endif

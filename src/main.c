@@ -14,19 +14,37 @@ static void local_func() {    // .text, local (t)
     ft_printf("Local function\n");
 }
 
+int page_size;
+
+
+
+
 
 int main(int argc, const char **argv)
 {
-    t_data data;
+	int 		i = 1;
+	int			fd;
+	char		*default_file = "a.out";
+	struct stat	file_stat;
+	bool		retval = true;
 
     page_size = getpagesize();
-    if (page_size < 64)
-        page_size = 64;
 
-    read_files(data, argc, argv);
+	if (argc == 1)
+	{
+		display_files("a.out");
+	}
+	
+	i = 1;
+	while (i < argc)
+	{
+		display_files(argv[i]);
+		i++;
+	}
 
 
-    return 0;
+	exit (retval);
+    return retval;
 }
 
 
