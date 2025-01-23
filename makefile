@@ -1,5 +1,5 @@
 # Variables générales
-CC = gcc
+CC = clang
 
 # -Wall -Wextra -Werror
 
@@ -17,7 +17,8 @@ OBJ_DIR = obj
 INCLUDE_DIR = includes
 
 # Fichiers source et objets
-SRC = main.c
+SRC = main.c \
+		read_files.c
 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))

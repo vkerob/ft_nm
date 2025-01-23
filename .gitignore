@@ -1,0 +1,6 @@
+ft_nm
+*.o
+test
+test.txt
+libft.a
+settings.json
