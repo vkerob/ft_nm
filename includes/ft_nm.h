@@ -13,7 +13,15 @@
 # include <stdbool.h>
 
 extern int	page_size;
+extern int	retval;
 
+
+typedef struct s_symbol_entry
+{
+    const char *name;       // Pointer to the name of the symbol
+    Elf64_Addr value;       // Value of the symbol (address)
+    char        type_char;  // Type (T, U, etc.)
+} t_symbol_entry;
 
 bool	display_files(const char *file);
 

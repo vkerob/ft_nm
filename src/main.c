@@ -16,10 +16,6 @@ static void local_func() {    // .text, local (t)
 
 int page_size;
 
-
-
-
-
 int main(int argc, const char **argv)
 {
 	int 		i = 1;
