@@ -225,19 +225,28 @@ void	get_32_64_header_and_section(void *file_map, Elf64_Ehdr **header64, Elf32_E
 	}	
 }
 
+#include <elf.h>
 
-// static char	get_symbol_type_64(Elf64_Sym sym, Elf64_Shdr *sections, const char *sym_name, unsigned char bind, unsigned char type)
-// {
+static char get_symbol_type_64(Elf64_Sym sym, Elf64_Shdr *sections) {
+    uint16_t shndx = sym.st_shndx;
+	unsigned char type = ELF64_ST_TYPE(sym.st_info);
+	unsigned char bind = ELF64_ST_BIND(sym.st_info);
 
-// }
+
+    // identify the type of the symbol
+	// t or T: The symbol is in the text (code) section.
+
+    // Cas par défaut : symbole inconnu
+    return '?';
+}
 
 
-void list_target_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Shdr *target_section, t_symbol_entry *symbols, size_t *pos_symbols)
+
+
+void set_target_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Shdr *target_section, Elf64_Shdr *strtab_section, t_symbol_entry *symbols, size_t *pos_symbols)
 {
-	Elf64_Shdr *strtab_section = NULL;
 
 	// get the string table section associated with the target section
-	strtab_section = &sections[target_section->sh_link]; // sh_link is the index of the string table section
 
 	// keep variables for the symbol table and string table
 	Elf64_Sym *symtab = (Elf64_Sym *)((char*)file_map + target_section->sh_offset);
@@ -248,21 +257,19 @@ void list_target_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Shdr *ta
 	for (size_t s = 0; s < symbol_count; s++) {
 		// get the actual symbol
 		Elf64_Sym sym = symtab[s];
-		
+
 		// get the name of the symbol
 		const char *sym_name = strtab + sym.st_name;
 
-		unsigned char bind = ELF64_ST_BIND(sym.st_info);
-		unsigned char type = ELF64_ST_TYPE(sym.st_info);
 		// get the type of the symbol
-		// char type_char = get_symbol_type_64(sym, sections, sym_name, bind, type);
+		char type_char = get_symbol_type_64(sym, sections);
 
 		if (*sym_name == '\0')
 			continue;
 
 		symbols[*pos_symbols].name = sym_name;
 		symbols[*pos_symbols].value = sym.st_value;
-		symbols[*pos_symbols].type_char = 'w';
+		symbols[*pos_symbols].type_char = type_char;
 		(*pos_symbols)++;
 
 		// sort the symbols by name alphabetically
@@ -270,47 +277,96 @@ void list_target_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Shdr *ta
 }
 
 
-void list_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Half sections_count)
+size_t	get_symbol_count_64(void *file_map, Elf64_Shdr *target_section, Elf64_Shdr *strtab_section)
 {
-    Elf64_Shdr *target_section = NULL; // symtab or dynsym
-	size_t symbol_count = 0; // number of symbols in the symtab and dynsym
-	t_symbol_entry *symbols = NULL;
-	size_t pos_symbols = 0;
+	size_t symbol_count = 0;
+
+	// get the string table section associated with the target section
+
+	// keep variables for the symbol table and string table
+	Elf64_Sym *symtab = (Elf64_Sym *)((char*)file_map + target_section->sh_offset);
+	const char *strtab = (const char *)file_map + strtab_section->sh_offset;
+	symbol_count = target_section->sh_size / sizeof(Elf64_Sym);
+	for (size_t s = 0; s < symbol_count; s++) {
+		// get the actual symbol
+		Elf64_Sym sym = symtab[s];
+
+		// get the name of the symbol
+		const char *sym_name = strtab + sym.st_name;
+
+		if (*sym_name == '\0')
+			symbol_count--;
+	}
+
+	return symbol_count;
+}
 
 
-	// browse all sections headers to find the symbol table (symtab or dynsym)
+void set_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Half sections_count, t_symbol_entry **symbols, size_t *symbol_count)
+{
+    Elf64_Shdr		*target_section = NULL; // symtab or dynsym
+	Elf64_Shdr		*strtab_section = NULL;
+	size_t			pos_symbols = 0;
+
+
+	// browse all sections headers to find the symbol table (symtab or dynsym) and count the symbols
     for (int i = 0; i < sections_count; i++) 
 	{
-        if (sections[i].sh_type == SHT_SYMTAB || sections[i].sh_type == SHT_DYNSYM) 
-			symbol_count += sections[i].sh_size / sizeof(Elf64_Sym);
+        if (sections[i].sh_type == SHT_SYMTAB) // || (sections[i].sh_type == SHT_DYNSYM && flag_dynsym))
+		{
+			target_section = &sections[i];
+			strtab_section = &sections[target_section->sh_link]; // sh_link is the index of the string table section
+			*symbol_count += get_symbol_count_64(file_map, target_section, strtab_section);
+		}
     }
-	symbols = (t_symbol_entry *)malloc(sizeof(t_symbol_entry) * symbol_count);
-	if (!symbols)
+
+	*symbols = (t_symbol_entry *)malloc(sizeof(t_symbol_entry) * *symbol_count);
+	if (!(*symbols))
 	{
 		perror("malloc");
 		return;
 	}
-	for (int i = 0; i < sections_count; i++) 
+	// browse all sections headers to find the symbol table (symtab or dynsym) and list the symbols
+	for (int i = 0; i < sections_count; i++)
 	{
-		if (sections[i].sh_type == SHT_SYMTAB || sections[i].sh_type == SHT_DYNSYM) 
+		if (sections[i].sh_type == SHT_SYMTAB)  //|| (sections[i].sh_type == SHT_DYNSYM && flag_dynsym))
 		{
 			target_section = &sections[i];
-			list_target_symbols_64(file_map, sections, target_section, symbols, &pos_symbols);
+			strtab_section = &sections[target_section->sh_link];
+			set_target_symbols_64(file_map, sections, target_section, strtab_section, *symbols, &pos_symbols);
 		}
+	}
+}
+
+
+void process_symbols(t_symbol_entry *symbols, size_t symbol_count)
+{
+	// sort the symbols by name alphabetically
+	for (size_t i = 0; i < symbol_count; i++)
+	{
+		if (symbols[i].value == 0)
+			printf("                ");
+		else
+			printf("%016lx", symbols[i].value);
+		printf(" %c ", symbols[i].type_char);
+		printf("%s\n", symbols[i].name);
 	}
 }
 
 
 bool	display_files(const char *file)
 {
-	int			i;
-	int			fd;
-	struct stat	file_stat;
-	void		*file_map;
-	Elf64_Ehdr	*header64 = NULL;
-	Elf32_Ehdr	*header32 = NULL;
-	Elf64_Shdr	*sections_header64 = NULL;
-	Elf32_Shdr	*sections_header32 = NULL;
+	int				i;
+	int				fd;
+	struct stat		file_stat;
+	void			*file_map;
+	Elf64_Ehdr		*header64 = NULL;
+	Elf32_Ehdr		*header32 = NULL;
+	Elf64_Shdr		*sections_header64 = NULL;
+	Elf32_Shdr		*sections_header32 = NULL;
+	t_symbol_entry	*symbols = NULL;
+	size_t			symbol_count = 0;
+
 
 	if (get_fd(file, &fd))
 		return true; // error
@@ -329,10 +385,11 @@ bool	display_files(const char *file)
 	// define the elf header and sections(32 bits or 64 bits)
 	get_32_64_header_and_section(file_map, &header64, &header32, &sections_header64, &sections_header32);
 	if (header64)
-		list_symbols_64(file_map, sections_header64, header64->e_shnum);
+		set_symbols_64(file_map, sections_header64, header64->e_shnum, &symbols, &symbol_count);
 	// else
 	// 	list_symbols_32(file_map, sections_header32, header32->e_shnum);
 //--------------------------------------------------------------------------------------------------------//
+	process_symbols(symbols, symbol_count);
 
 	return false;
 }
