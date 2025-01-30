@@ -18,7 +18,8 @@ INCLUDE_DIR = includes
 
 # Fichiers source et objets
 SRC = main.c \
-		display_files.c
+		display_files.c \
+		save_symbols.c
 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))

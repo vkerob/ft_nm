@@ -2,6 +2,8 @@ ft_nm
 *.o
 test
 test.txt
+ft_nm.txt
+nm.txt
 libft.a
 settings.json
 binutils-2.41

@@ -1,56 +1,5 @@
 # include "../includes/ft_nm.h"
 
-static void write_hex_64bytes(void *data, int fd_stdout)
-{
-    static const char hexdig[] = "0123456789abcdef";
-    unsigned char *p = (unsigned char*)data;
-
-    for (int i = 0; i < 64; i++) {
-        char buf[3];
-        buf[0] = hexdig[(p[i] >> 4) & 0xF];
-        buf[1] = hexdig[p[i] & 0xF];
-        buf[2] = ' ';
-        write(fd_stdout, buf, 3);
-    }
-    write(fd_stdout, "\n", 1);
-}
-
-
-void print_memory(const void *header, size_t size) {
-    const unsigned char *bytes = (const unsigned char *)header;
-    size_t i;
-
-    for (i = 0; i < size; i++) {
-        printf("%02x ", bytes[i]);
-        if ((i + 1) % 16 == 0) { // Saut de ligne tous les 16 octets
-            printf("\n");
-        }
-    }
-    if (i % 16 != 0) {
-        printf("\n");
-    }
-}
-
-void ft_print_memory(const void *header, size_t size) {
-    const unsigned char *bytes = (const unsigned char *)header;
-    size_t i;
-
-    for (i = 0; i < size; i++) {
-        if (bytes[i] < 16) {
-            ft_printf("0%x ", bytes[i]); // Ajoute un zéro pour les nombres inférieurs à 16
-        } else {
-            ft_printf("%x ", bytes[i]);
-        }
-        if ((i + 1) % 16 == 0) { // Saut de ligne tous les 16 octets
-            ft_printf("\n");
-        }
-    }
-    if (i % 16 != 0) {
-        ft_printf("\n"); // Saut de ligne final si nécessaire
-    }
-}
-
-
 int	open_file(const char *file)
 {
 	int			fd;
@@ -99,7 +48,6 @@ struct stat	get_file_size(int fd, const char *file)
 }
 
 
-
 bool	get_fd(const char *file, int *fd)
 {
 	*fd = open_file(file);
@@ -112,6 +60,7 @@ bool	get_fd(const char *file, int *fd)
 	}
 	return false;
 }
+
 
 bool	get_file_stat(struct stat *file_stat, const char *file, int *fd)
 {
@@ -191,8 +140,6 @@ bool	check_header(void **file_map, struct stat file_stat, const char *file, int 
 }
 
 
-
-
 bool	get_file_map(void **file_map, size_t file_size, int fd)
 {
 	// if file_map is not already mapped
@@ -210,6 +157,7 @@ bool	get_file_map(void **file_map, size_t file_size, int fd)
 	return false;
 }
 
+
 void	get_32_64_header_and_section(void *file_map, Elf64_Ehdr **header64, Elf32_Ehdr **header32, Elf64_Shdr **sections_header64, Elf32_Shdr **sections_header32)
 {
 	unsigned char *e_ident = (unsigned char *)file_map;
@@ -222,128 +170,78 @@ void	get_32_64_header_and_section(void *file_map, Elf64_Ehdr **header64, Elf32_E
 	{
 		*header32 = (Elf32_Ehdr *)file_map;
 		*sections_header32 = (Elf32_Shdr *)(file_map + (*header32)->e_shoff);
-	}	
-}
-
-#include <elf.h>
-
-static char get_symbol_type_64(Elf64_Sym sym, Elf64_Shdr *sections) {
-    uint16_t shndx = sym.st_shndx;
-	unsigned char type = ELF64_ST_TYPE(sym.st_info);
-	unsigned char bind = ELF64_ST_BIND(sym.st_info);
-
-
-    // identify the type of the symbol
-	// t or T: The symbol is in the text (code) section.
-
-    // Cas par défaut : symbole inconnu
-    return '?';
-}
-
-
-
-
-void set_target_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Shdr *target_section, Elf64_Shdr *strtab_section, t_symbol_entry *symbols, size_t *pos_symbols)
-{
-
-	// get the string table section associated with the target section
-
-	// keep variables for the symbol table and string table
-	Elf64_Sym *symtab = (Elf64_Sym *)((char*)file_map + target_section->sh_offset);
-	const char *strtab = (const char *)file_map + strtab_section->sh_offset;
-	size_t symbol_count = target_section->sh_size / sizeof(Elf64_Sym);
-
-	// browse all symbols (s = symbol)
-	for (size_t s = 0; s < symbol_count; s++) {
-		// get the actual symbol
-		Elf64_Sym sym = symtab[s];
-
-		// get the name of the symbol
-		const char *sym_name = strtab + sym.st_name;
-
-		// get the type of the symbol
-		char type_char = get_symbol_type_64(sym, sections);
-
-		if (*sym_name == '\0')
-			continue;
-
-		symbols[*pos_symbols].name = sym_name;
-		symbols[*pos_symbols].value = sym.st_value;
-		symbols[*pos_symbols].type_char = type_char;
-		(*pos_symbols)++;
-
-		// sort the symbols by name alphabetically
 	}
 }
 
 
-size_t	get_symbol_count_64(void *file_map, Elf64_Shdr *target_section, Elf64_Shdr *strtab_section)
-{
-	size_t symbol_count = 0;
+static int compare_symbols(const char *symA, const char *symB) {
+    size_t i = 0, j = 0;
 
-	// get the string table section associated with the target section
-
-	// keep variables for the symbol table and string table
-	Elf64_Sym *symtab = (Elf64_Sym *)((char*)file_map + target_section->sh_offset);
-	const char *strtab = (const char *)file_map + strtab_section->sh_offset;
-	symbol_count = target_section->sh_size / sizeof(Elf64_Sym);
-	for (size_t s = 0; s < symbol_count; s++) {
-		// get the actual symbol
-		Elf64_Sym sym = symtab[s];
-
-		// get the name of the symbol
-		const char *sym_name = strtab + sym.st_name;
-
-		if (*sym_name == '\0')
-			symbol_count--;
-	}
-
-	return symbol_count;
-}
-
-
-void set_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Half sections_count, t_symbol_entry **symbols, size_t *symbol_count)
-{
-    Elf64_Shdr		*target_section = NULL; // symtab or dynsym
-	Elf64_Shdr		*strtab_section = NULL;
-	size_t			pos_symbols = 0;
-
-
-	// browse all sections headers to find the symbol table (symtab or dynsym) and count the symbols
-    for (int i = 0; i < sections_count; i++) 
+    while (symA[i] != '\0' && symB[j] != '\0') 
 	{
-        if (sections[i].sh_type == SHT_SYMTAB) // || (sections[i].sh_type == SHT_DYNSYM && flag_dynsym))
-		{
-			target_section = &sections[i];
-			strtab_section = &sections[target_section->sh_link]; // sh_link is the index of the string table section
-			*symbol_count += get_symbol_count_64(file_map, target_section, strtab_section);
-		}
+        while (symA[i] != '\0' && !ft_isalnum((unsigned char)symA[i]))
+            i++;
+        while (symB[j] != '\0' && !ft_isalnum((unsigned char)symB[j]))
+            j++;
+
+        // if one of the strings is finished
+        if (symA[i] == '\0' || symB[j] == '\0')
+            break;
+
+        char normalizedA = ft_tolower((unsigned char)symA[i]);
+        char normalizedB = ft_tolower((unsigned char)symB[j]);
+        if (normalizedA != normalizedB)
+            return normalizedA - normalizedB;
+
+        i++;
+        j++;
     }
 
-	*symbols = (t_symbol_entry *)malloc(sizeof(t_symbol_entry) * *symbol_count);
-	if (!(*symbols))
-	{
-		perror("malloc");
-		return;
-	}
-	// browse all sections headers to find the symbol table (symtab or dynsym) and list the symbols
-	for (int i = 0; i < sections_count; i++)
-	{
-		if (sections[i].sh_type == SHT_SYMTAB)  //|| (sections[i].sh_type == SHT_DYNSYM && flag_dynsym))
-		{
-			target_section = &sections[i];
-			strtab_section = &sections[target_section->sh_link];
-			set_target_symbols_64(file_map, sections, target_section, strtab_section, *symbols, &pos_symbols);
-		}
-	}
+    // cleans up the strings ( exemple : "start" and "start%%%" will have the same normalized string)
+    while (symA[i] != '\0' && !ft_isalnum((unsigned char)symA[i]))
+        i++;
+    while (symB[j] != '\0' && !ft_isalnum((unsigned char)symB[j]))
+        j++;
+
+	// if both strings are empty
+	if (symA[i] == '\0' && symB[j] == '\0')
+        return ft_strcmp(symA, symB);
+
+    return (unsigned char)symA[i] - (unsigned char)symB[j];
+}
+
+
+
+void sort_symbols_by_name(t_symbol_entry *symbols, size_t symbol_count)
+{
+    if (!symbols || symbol_count <= 1)
+        return;
+
+
+    for (size_t i = 0; i < symbol_count - 1; i++)
+    {
+        for (size_t j = 0; j < symbol_count - i - 1; j++)
+        {
+            if (compare_symbols(symbols[j].name, symbols[j + 1].name) > 0)
+            {
+                // Échange
+                t_symbol_entry tmp = symbols[j];
+                symbols[j] = symbols[j + 1];
+                symbols[j + 1] = tmp;
+            }
+        }
+    }
 }
 
 
 void process_symbols(t_symbol_entry *symbols, size_t symbol_count)
 {
 	// sort the symbols by name alphabetically
+	sort_symbols_by_name(symbols, symbol_count);
 	for (size_t i = 0; i < symbol_count; i++)
 	{
+		if (symbols[i].type_char == ' ')
+			continue;
 		if (symbols[i].value == 0)
 			printf("                ");
 		else
@@ -385,7 +283,10 @@ bool	display_files(const char *file)
 	// define the elf header and sections(32 bits or 64 bits)
 	get_32_64_header_and_section(file_map, &header64, &header32, &sections_header64, &sections_header32);
 	if (header64)
-		set_symbols_64(file_map, sections_header64, header64->e_shnum, &symbols, &symbol_count);
+	{
+		if (save_symbols_64(file_map, sections_header64, header64->e_shnum, &symbols, &symbol_count))
+			return true; // error
+	}
 	// else
 	// 	list_symbols_32(file_map, sections_header32, header32->e_shnum);
 //--------------------------------------------------------------------------------------------------------//

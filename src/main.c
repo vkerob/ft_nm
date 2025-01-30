@@ -38,7 +38,6 @@ int main(int argc, const char **argv)
 		i++;
 	}
 
-
 	exit (retval);
     return retval;
 }
