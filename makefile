@@ -19,7 +19,14 @@ INCLUDE_DIR = includes
 # Fichiers source et objets
 SRC = main.c \
 		display_files.c \
-		save_symbols.c
+		files_handler/get_fd.c \
+		files_handler/get_file_stat.c \
+		files_handler/get_file_map.c \
+		symbols_handler/save_symbols.c \
+		symbols_handler/set_symbols.c \
+		symbols_handler/get_symbols_count.c \
+		symbols_handler/get_symbol_type_char.c \
+		output_ft_nm/process_symbols.c
 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
