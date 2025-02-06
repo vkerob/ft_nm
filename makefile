@@ -1,9 +1,9 @@
 # Variables générales
-CC = clang
+CC = gcc
 
 # -Wall -Wextra -Werror
 
-CFLAGS = -g
+CFLAGS = -g -m32
 
 # Répertoires
 LIBFT_DIR = ./libft

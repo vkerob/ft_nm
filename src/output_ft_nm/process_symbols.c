@@ -60,18 +60,57 @@ static void	sort_symbols_by_name(t_symbol_entry *symbols, size_t symbol_count)
     }
 }
 
-static void	print_symbols(t_symbol_entry *symbols, size_t symbol_count)
+void	ft_putnbr_hex_fd(unsigned long n, int fd, int width)
+{
+	char	*hex_digits = "0123456789abcdef";
+	char	buffer[32];  // suffisant pour 64 bits
+	int		i;
+
+	i = 0;
+	// Si n est 0, on met un seul '0'
+	if (n == 0)
+		buffer[i++] = '0';
+	else
+	{
+		while (n > 0)
+		{
+			buffer[i++] = hex_digits[n % 16];
+			n /= 16;
+		}
+	}
+	// Calcul du nombre de zéros à ajouter pour atteindre la largeur souhaitée
+	while (i < width)
+		buffer[i++] = '0';
+	// Affichage dans l'ordre inverse (le buffer contient le chiffre le moins significatif en premier)
+	while (i--)
+		ft_putchar_fd(buffer[i], fd);
+}
+
+static void	print_symbols_64(t_symbol_entry *symbols, size_t symbol_count)
+{
+	for (size_t i = 0; i < symbol_count; i++)
+	{
+		printf("test1\n");
+		if (symbols[i].value == NULL && symbols[i].type_char == 'U')
+			ft_putstr_fd("                ", 1);
+		else
+			ft_putnbr_hex_fd((unsigned long)symbols[i].value, 1, 16);
+		ft_printf(" %c %s\n", symbols[i].type_char, symbols[i].name);
+	}
+}
+
+static void	print_symbols_32(t_symbol_entry *symbols, size_t symbol_count)
 {
 	for (size_t i = 0; i < symbol_count; i++)
 	{
 		if (symbols[i].type_char == ' ')
 			continue;
-		if (symbols[i].value == 0)
-			printf("                ");
+		if (symbols[i].value == NULL && symbols[i].type_char == 'U')
+			ft_putstr_fd("        ", 1);
 		else
-			printf("%016lx", (unsigned long)symbols[i].value);
-		printf(" %c ", symbols[i].type_char);
-		printf("%s\n", symbols[i].name);
+			ft_putnbr_hex_fd((unsigned long)symbols[i].value, 1, 8);
+
+		ft_printf(" %c %s\n", symbols[i].type_char, symbols[i].name);
 	}
 }
 
@@ -82,6 +121,9 @@ void	process_symbols(t_symbol_entry **symbols, size_t symbol_count, const char *
 	sort_symbols_by_name(*symbols, symbol_count);
 	if (argc > 2)
 		printf("\n%s:\n", file);
-	print_symbols(*symbols, symbol_count);
+	if (is_64)
+		print_symbols_64(*symbols, symbol_count);
+	else
+		print_symbols_32(*symbols, symbol_count);
 	free(*symbols);
 }
