@@ -20,6 +20,8 @@ bool	save_symbols_64(void *file_map, t_symbol_entry **symbols, size_t *symbol_co
 	Elf64_Shdr		*sections_header;
 	size_t			sections_count;
 
+
+
 	// browse all sections headers to find the symbol table (symtab or dynsym) and count the symbols
 
 	get_64_header_and_section(file_map, &header, &sections_header);

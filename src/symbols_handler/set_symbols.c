@@ -17,11 +17,11 @@ void	set_target_symbols_32(void *file_map, Elf32_Shdr *sections, Elf32_Shdr *tar
 		const char *sym_name = strtab + sym.st_name;
 
 		// get the type of the symbol
+		char type_char = get_symbol_type_char_32(sym, sections);
 
-		if (*sym_name == '\0')
+		if (is_unvalid_symbol_32(sym, s, symtab, strtab, symbol_count, sections))
 			continue;
 
-		char type_char = get_symbol_type_char_32(sym, sections);
 
 		symbols[*pos_symbols].name = sym_name;
 		symbols[*pos_symbols].value = (void *)(uintptr_t)sym.st_value;
@@ -48,11 +48,10 @@ void	set_target_symbols_64(void *file_map, Elf64_Shdr *sections, Elf64_Shdr *tar
 		const char *sym_name = strtab + sym.st_name;
 
 		// get the type of the symbol
-
-		if (*sym_name == '\0')
-			continue;
-
 		char type_char = get_symbol_type_char_64(sym, sections);
+
+		if (is_unvalid_symbol_64(sym, s, symtab, strtab, symbol_count, sections))
+			continue;
 
 		symbols[*pos_symbols].name = sym_name;
 		symbols[*pos_symbols].value = (void *)(uintptr_t)sym.st_value;
@@ -71,7 +70,7 @@ void	set_symbols_32(void *file_map, Elf32_Shdr *sections, t_symbol_entry *symbol
 
 	for (int i = 0; i < sections_count; i++)
 	{
-		if (sections[i].sh_type == SHT_SYMTAB)  // || (sections[i].sh_type == SHT_DYNSYM && flag_dynsym))
+		if ((sections[i].sh_type == SHT_SYMTAB))
 		{
 			target_section = &sections[i];
 			strtab_section = &sections[target_section->sh_link];
@@ -90,7 +89,7 @@ void	set_symbols_64(void *file_map, Elf64_Shdr *sections, t_symbol_entry *symbol
 
 	for (int i = 0; i < sections_count; i++)
 	{
-		if (sections[i].sh_type == SHT_SYMTAB)  // || (sections[i].sh_type == SHT_DYNSYM && flag_dynsym))
+		if ((sections[i].sh_type == SHT_SYMTAB))
 		{
 			target_section = &sections[i];
 			strtab_section = &sections[target_section->sh_link];

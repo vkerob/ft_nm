@@ -18,7 +18,7 @@ INCLUDE_DIR = includes
 
 # Fichiers source et objets
 SRC = main.c \
-		display_files.c \
+		display_file.c \
 		files_handler/get_fd.c \
 		files_handler/get_file_stat.c \
 		files_handler/get_file_map.c \
@@ -26,6 +26,8 @@ SRC = main.c \
 		symbols_handler/set_symbols.c \
 		symbols_handler/get_symbols_count.c \
 		symbols_handler/get_symbol_type_char.c \
+		symbols_handler/is_external.c \
+		symbols_handler/is_unvalid_symbol.c \
 		output_ft_nm/process_symbols.c
 
 

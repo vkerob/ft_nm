@@ -4,6 +4,9 @@
 static int compare_symbols(const char *symA, const char *symB) {
     size_t i = 0, j = 0;
 
+	if (symA == NULL || symB == NULL)
+		return 0;
+
     while (symA[i] != '\0' && symB[j] != '\0') 
 	{
         while (symA[i] != '\0' && !ft_isalnum((unsigned char)symA[i]))
@@ -60,70 +63,81 @@ static void	sort_symbols_by_name(t_symbol_entry *symbols, size_t symbol_count)
     }
 }
 
-void	ft_putnbr_hex_fd(unsigned long n, int fd, int width)
+void	ft_putnbr_hex_fd(unsigned long adress, int fd, int width)
 {
 	char	*hex_digits = "0123456789abcdef";
-	char	buffer[32];  // suffisant pour 64 bits
+	char	buffer[32];
 	int		i;
 
 	i = 0;
-	// Si n est 0, on met un seul '0'
-	if (n == 0)
+	if (adress == 0)
 		buffer[i++] = '0';
 	else
 	{
-		while (n > 0)
+		while (adress > 0)
 		{
-			buffer[i++] = hex_digits[n % 16];
-			n /= 16;
+			buffer[i++] = hex_digits[adress % 16];
+			adress /= 16;
 		}
 	}
-	// Calcul du nombre de zéros à ajouter pour atteindre la largeur souhaitée
 	while (i < width)
 		buffer[i++] = '0';
-	// Affichage dans l'ordre inverse (le buffer contient le chiffre le moins significatif en premier)
 	while (i--)
 		ft_putchar_fd(buffer[i], fd);
 }
 
-static void	print_symbols_64(t_symbol_entry *symbols, size_t symbol_count)
-{
-	for (size_t i = 0; i < symbol_count; i++)
-	{
-		printf("test1\n");
-		if (symbols[i].value == NULL && symbols[i].type_char == 'U')
-			ft_putstr_fd("                ", 1);
-		else
-			ft_putnbr_hex_fd((unsigned long)symbols[i].value, 1, 16);
-		ft_printf(" %c %s\n", symbols[i].type_char, symbols[i].name);
-	}
-}
-
-static void	print_symbols_32(t_symbol_entry *symbols, size_t symbol_count)
+void	print_ft_nm(t_symbol_entry *symbols, size_t symbol_count, int width)
 {
 	for (size_t i = 0; i < symbol_count; i++)
 	{
 		if (symbols[i].type_char == ' ')
 			continue;
-		if (symbols[i].value == NULL && symbols[i].type_char == 'U')
-			ft_putstr_fd("        ", 1);
-		else
-			ft_putnbr_hex_fd((unsigned long)symbols[i].value, 1, 8);
 
+		if ((symbols[i].value == NULL && !print_debug_syms)||
+            (print_debug_syms && 
+             (symbols[i].type_char == 'U' ||
+              symbols[i].type_char == 'w' ||
+              symbols[i].type_char == 'v')))
+        {
+            for (int j = 0; j < width; j++)
+                ft_putchar_fd(' ', 1);
+        }
+		else
+			ft_putnbr_hex_fd((unsigned long)symbols[i].value, 1, width);
 		ft_printf(" %c %s\n", symbols[i].type_char, symbols[i].name);
 	}
 }
 
-
-void	process_symbols(t_symbol_entry **symbols, size_t symbol_count, const char *file, int argc)
+void	print_reverse_alpha_sort(t_symbol_entry *symbols, size_t symbol_count, int width)
 {
+	for (size_t i = symbol_count; i > 0; i--)
+	{
+		if (symbols[i - 1].type_char == ' ')
+			continue;
+		if (symbols[i - 1].value == NULL)
+		{
+			for (int j = 0; j < width; j++)
+				ft_putchar_fd(' ', 1);
+		}
+		else
+			ft_putnbr_hex_fd((unsigned long)symbols[i - 1].value, 1, width);
+		ft_printf(" %c %s\n", symbols[i - 1].type_char, symbols[i - 1].name);
+	}
+}
+
+
+void	process_symbols(t_symbol_entry **symbols, size_t symbol_count, const char *file, int nb_files)
+{
+
+	int	width = is_64 ? 16 : 8;
 	// sort the symbols by name alphabetically
-	sort_symbols_by_name(*symbols, symbol_count);
-	if (argc > 2)
+	if (no_sort == false)
+		sort_symbols_by_name(*symbols, symbol_count);
+	if (nb_files > 2)
 		printf("\n%s:\n", file);
-	if (is_64)
-		print_symbols_64(*symbols, symbol_count);
+	if (reverse_sort)
+		print_reverse_alpha_sort(*symbols, symbol_count, width);
 	else
-		print_symbols_32(*symbols, symbol_count);
+		print_ft_nm(*symbols, symbol_count, width);
 	free(*symbols);
 }

@@ -1,7 +1,7 @@
 # include "../includes/ft_nm.h"
 
 
-bool	display_files(const char *file, int argc)
+bool	display_file(const char *file, int nb_files)
 {
 	int				i;
 	int				fd;
@@ -24,7 +24,7 @@ bool	display_files(const char *file, int argc)
 	if (save_symbols(file_map, &symbols, &symbol_count))
 		return true; // error
 
-	process_symbols(&symbols, symbol_count, file, argc);
+	process_symbols(&symbols, symbol_count, file, nb_files);
 
 	return false;
 }

@@ -59,8 +59,13 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 	unsigned char bind = ELF32_ST_BIND(sym.st_info); // get the binding of the symbol (local, global, etc.)
 
 
-	if (type == STT_FILE || type == STT_SECTION)
+	if (type == STT_FILE && print_debug_syms)
+        return (bind == STB_LOCAL) ? 'a' : 'A';
+	else if (type == STT_FILE)
 		return ' ';
+    // Si tu veux conserver le filtrage des symboles de section, tu peux garder cette condition
+    if (type == STT_SECTION)
+        return ' ';
 	
 
 	// STB_WEAK (w, W, v, V)
@@ -148,8 +153,13 @@ char get_symbol_type_char_64(Elf64_Sym sym, Elf64_Shdr *sections)
 	unsigned char bind = ELF64_ST_BIND(sym.st_info); // get the binding of the symbol (local, global, etc.)
 
 
-	if (type == STT_FILE || type == STT_SECTION)
+	if (type == STT_FILE && print_debug_syms)
+        return (bind == STB_LOCAL) ? 'a' : 'A';
+	else if (type == STT_FILE)
 		return ' ';
+    // Si tu veux conserver le filtrage des symboles de section, tu peux garder cette condition
+    if (type == STT_SECTION)
+        return ' ';
 	
 
 	// STB_WEAK (w, W, v, V)
