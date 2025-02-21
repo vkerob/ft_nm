@@ -129,7 +129,7 @@ void	print_reverse_alpha_sort(t_symbol_entry *symbols, size_t symbol_count, int 
 void	process_symbols(t_symbol_entry **symbols, size_t symbol_count, const char *file, int nb_files)
 {
 
-	int	width = is_64 ? 16 : 8;
+	int	width = is_64 ? 16 : 8; // address width
 	// sort the symbols by name alphabetically
 	if (no_sort == false)
 		sort_symbols_by_name(*symbols, symbol_count);

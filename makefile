@@ -1,5 +1,5 @@
 # Variables générales
-CC = gcc
+CC = clang
 
 # -Wall -Wextra -Werror
 
@@ -17,7 +17,7 @@ OBJ_DIR = obj
 INCLUDE_DIR = includes
 
 # Fichiers source et objets
-SRC = main.c \
+SRC = ft_nm.c \
 		display_file.c \
 		files_handler/get_fd.c \
 		files_handler/get_file_stat.c \

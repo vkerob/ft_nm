@@ -1,6 +1,5 @@
 #include "../../includes/ft_nm.h"
 
-
 static struct stat get_file_size(int fd, const char *file)
 {
     struct stat file_stat;
@@ -16,7 +15,8 @@ static struct stat get_file_size(int fd, const char *file)
     }
     if (file_stat.st_size < 0)
     {
-        ft_printf("ft_nm : %s: has negative size, probably it is too large\n", file);
+        ft_printf("ft_nm : %s: has negative size, probably it is too large\n",
+                  file);
         goto error;
     }
     if (file_stat.st_size < sizeof(Elf64_Ehdr))
@@ -32,21 +32,20 @@ error:
     return file_stat;
 }
 
-
-bool	get_file_stat(struct stat *file_stat, const char *file, int *fd)
+bool get_file_stat(struct stat *file_stat, const char *file, int *fd)
 {
-	*file_stat = get_file_size(*fd, file);
-	if (S_ISDIR((*file_stat).st_mode))
-	{
-		ft_printf("ft_nm :%s: is a directory\n", file);
-		return true;
-	}
-	else if (!S_ISREG((*file_stat).st_mode))
-	{
-		ft_printf("ft_nm :%s: is not an ordinary file\n", file);
-		return true;
-	}
-	else if ((*file_stat).st_size == 0)
-		return true;
-	return false;
+    *file_stat = get_file_size(*fd, file);
+    if (S_ISDIR((*file_stat).st_mode))
+    {
+        ft_printf("ft_nm :%s: is a directory\n", file);
+        return true;
+    }
+    else if (!S_ISREG((*file_stat).st_mode))
+    {
+        ft_printf("ft_nm :%s: is not an ordinary file\n", file);
+        return true;
+    }
+    else if ((*file_stat).st_size == 0)
+        return true;
+    return false;
 }

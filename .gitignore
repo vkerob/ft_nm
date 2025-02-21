@@ -7,3 +7,4 @@ nm.txt
 libft.a
 settings.json
 binutils-2.41
+.clang-format
