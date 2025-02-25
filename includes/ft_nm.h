@@ -54,11 +54,9 @@ void set_symbols_32(void *file_map, Elf32_Shdr *sections,
 bool is_external_64(Elf64_Sym sym);
 bool is_external_32(Elf32_Sym sym);
 
-bool is_unvalid_symbol_64(Elf64_Sym sym, size_t current_index,
-                          Elf64_Sym *symtab, const char *strtab,
-                          size_t total_symbols, Elf64_Shdr *sections);
-bool is_unvalid_symbol_32(Elf32_Sym sym, size_t current_index,
-                          Elf32_Sym *symtab, const char *strtab,
-                          size_t total_symbols, Elf32_Shdr *sections);
+bool is_unvalid_symbol_64(Elf64_Sym sym, const char *strtab,
+                          Elf64_Shdr *sections);
+bool is_unvalid_symbol_32(Elf32_Sym sym, const char *strtab,
+                          Elf32_Shdr *sections);
 
 #endif
