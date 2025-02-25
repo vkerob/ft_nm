@@ -33,13 +33,17 @@ bool save_symbols_64(void *file_map, t_symbol_entry **symbols,
 		get_symbols_count_64(file_map, sections_header, sections_count);
 	if (*symbol_count == 0)
 	{
-		ft_printf("ft_nm: %s: no symbols\n", file_name);
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file_name, 2);
+		ft_putstr_fd(": no symbols\n", 2);
 		return true;
 	}
 	*symbols = (t_symbol_entry *)malloc(sizeof(t_symbol_entry) * *symbol_count);
 	if (!(*symbols))
 	{
-		perror("malloc");
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file_name, 2);
+		ft_putstr_fd(": malloc failed\n", 2);
 		return true;
 	}
 	// browse all sections headers to find the symbol table (symtab or dynsym)
@@ -66,13 +70,17 @@ bool save_symbols_32(void *file_map, t_symbol_entry **symbols,
 		get_symbols_count_32(file_map, sections_header, sections_count);
 	if (*symbol_count == 0)
 	{
-		ft_printf("ft_nm: %s: no symbols\n", file_name);
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file_name, 2);
+		ft_putstr_fd(": no symbols\n", 2);
 		return true;
 	}
 	*symbols = (t_symbol_entry *)malloc(sizeof(t_symbol_entry) * *symbol_count);
 	if (!(*symbols))
 	{
-		perror("malloc");
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file_name, 2);
+		ft_putstr_fd(": malloc failed\n", 2);
 		return true;
 	}
 	// browse all sections headers to find the symbol table (symtab or dynsym)

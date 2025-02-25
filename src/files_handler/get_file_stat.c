@@ -6,7 +6,7 @@ static struct stat get_file_size(int fd, const char *file)
 
 	if (fstat(fd, &file_stat) < 0)
 	{
-		perror("Error getting file stats");
+		ft_putstr_fd("Error getting file stats\n", 2);
 		goto error;
 	}
 	if (file_stat.st_size == 0)
@@ -15,13 +15,16 @@ static struct stat get_file_size(int fd, const char *file)
 	}
 	if (file_stat.st_size < 0)
 	{
-		ft_printf("ft_nm : %s: has negative size, probably it is too large\n",
-				  file);
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file, 2);
+		ft_putstr_fd(": has negative size, probably it is too large\n", 2);
 		goto error;
 	}
 	if (file_stat.st_size < (long)sizeof(Elf64_Ehdr))
 	{
-		ft_printf("ft_nm : %s: File format not recognized\n", file);
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file, 2);
+		ft_putstr_fd(": file format not recognized\n", 2);
 		goto error;
 	}
 	return file_stat;
@@ -35,17 +38,25 @@ error:
 bool get_file_stat(struct stat *file_stat, const char *file, int *fd)
 {
 	*file_stat = get_file_size(*fd, file);
+	if ((*file_stat).st_size == 0)
+		return true;
+
 	if (S_ISDIR((*file_stat).st_mode))
 	{
-		ft_printf("ft_nm :%s: is a directory\n", file);
+		ft_putstr_fd("ft_nm: Warning : « ", 2);
+		ft_putstr_fd((char *)file, 2);
+		ft_putstr_fd(" » is a directory\n", 2);
 		return true;
 	}
 	else if (!S_ISREG((*file_stat).st_mode))
 	{
-		ft_printf("ft_nm :%s: is not an ordinary file\n", file);
+		ft_putstr_fd("ft_nm: ", 2);
+		ft_putstr_fd((char *)file, 2);
+		ft_putstr_fd(": is not an ordinary file\n", 2);
 		return true;
 	}
 	else if ((*file_stat).st_size == 0)
 		return true;
+
 	return false;
 }

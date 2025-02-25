@@ -6,7 +6,11 @@ bool get_fd(const char *file, int *fd)
 	if (*fd < 0)
 	{
 		if (errno == ENOENT)
-			ft_printf("ft_nm : « %s »: No such file\n", file);
+		{
+			ft_putstr_fd("ft_nm: « ", 2);
+			ft_putstr_fd((char *)file, 2);
+			ft_putstr_fd(" »: No such file\n", 2);
+		}
 		close(*fd);
 		return true;
 	}
