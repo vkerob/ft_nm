@@ -137,5 +137,4 @@ void process_symbols(t_symbol_entry **symbols, size_t symbol_count,
 		print_reverse_alpha_sort(*symbols, symbol_count, width);
 	else
 		print_ft_nm(*symbols, symbol_count, width);
-	free(*symbols);
 }

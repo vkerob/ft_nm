@@ -10,6 +10,7 @@ static bool cleanup_and_report(const char *file, int fd, void **file_map,
 	// Modified error output.
 	ft_putstr_fd("ft_nm: ", 2);
 	ft_putstr_fd((char *)file, 2);
+	ft_putstr_fd(error_msg, 2);
 	return true;
 }
 
@@ -32,18 +33,20 @@ static bool check_header(void **file_map, struct stat file_stat,
 	if (e_ident[EI_CLASS] == ELFCLASS64)
 	{
 		Elf64_Ehdr *header = (Elf64_Ehdr *)(*file_map);
-		if (header->e_type != ET_EXEC && header->e_type != ET_DYN &&
-			header->e_type != ET_REL)
+		if ((header->e_type != ET_EXEC && header->e_type != ET_DYN &&
+			header->e_type != ET_REL) ||
+			(header->e_ident[EI_DATA] != ELFDATA2LSB && header->e_ident[EI_DATA] != ELFDATA2MSB))
 			return cleanup_and_report(file, fd, file_map,
 									  ": file format not recognized\n",
-									  page_size);
+									  page_size);                                                                  
 		is_64 = true;
 	}
 	else if (e_ident[EI_CLASS] == ELFCLASS32)
 	{
 		Elf32_Ehdr *header = (Elf32_Ehdr *)(*file_map);
-		if (header->e_type != ET_EXEC && header->e_type != ET_DYN &&
-			header->e_type != ET_REL)
+		if ((header->e_type != ET_EXEC && header->e_type != ET_DYN &&
+			header->e_type != ET_REL) ||
+			(header->e_ident[EI_DATA] != ELFDATA2LSB && header->e_ident[EI_DATA] != ELFDATA2MSB))
 			return cleanup_and_report(file, fd, file_map,
 									  ": file format not recognized\n",
 									  page_size);
