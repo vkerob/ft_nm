@@ -91,10 +91,7 @@ void print_ft_nm(t_symbol_entry *symbols, size_t symbol_count, int width)
 		if (symbols[i].type_char == ' ')
 			continue;
 
-		if ((symbols[i].value == NULL && !print_debug_syms) ||
-			(print_debug_syms &&
-			 (symbols[i].type_char == 'U' || symbols[i].type_char == 'w' ||
-			  symbols[i].type_char == 'v')))
+		if (symbols[i].value == NULL)
 		{
 			for (int j = 0; j < width; j++)
 				ft_putchar_fd(' ', 1);

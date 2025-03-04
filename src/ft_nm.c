@@ -3,7 +3,6 @@
 int page_size;
 bool is_64;
 
-bool print_debug_syms = false; /* -a Print debugger-only symbols too. */
 bool external_only = false;	   /* -g Print external symbols only.  */
 bool undefined_only = false;   /* -u Print undefined symbols only.  */
 bool reverse_sort = false; /* -r Sort in downward(alpha or numeric) order.  */
@@ -11,7 +10,7 @@ bool no_sort = false;	   /* -p Don't sort; print syms in order found.  */
 
 bool is_handle_option(char c)
 {
-	return (c == 'a' || c == 'g' || c == 'p' || c == 'r' || c == 'u');
+	return (c == 'g' || c == 'p' || c == 'r' || c == 'u');
 }
 
 int set_options(int argc, const char **argv)
@@ -27,13 +26,8 @@ int set_options(int argc, const char **argv)
 		{
 			for (size_t j = 1; j < ft_strlen(argv[i]); j++)
 			{
-				if (argv[i][j] == 'a' && !undefined_only && !external_only)
-					print_debug_syms = true;
-				else if (argv[i][j] == 'g' && !undefined_only)
-				{
-					print_debug_syms = false;
+				if (argv[i][j] == 'g' && !undefined_only)
 					external_only = true;
-				}
 				else if (argv[i][j] == 'p')
 				{
 					reverse_sort = false;
@@ -43,7 +37,6 @@ int set_options(int argc, const char **argv)
 					reverse_sort = true;
 				else if (argv[i][j] == 'u')
 				{
-					print_debug_syms = false;
 					external_only = false;
 					undefined_only = true;
 				}

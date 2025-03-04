@@ -15,7 +15,6 @@
 extern int page_size;
 extern bool is_64;
 
-extern bool print_debug_syms; /* -a Print debugger-only symbols too. */
 extern bool external_only;    /* -g Print external symbols only.  */
 extern bool undefined_only;   /* -u Print undefined symbols only.  */
 extern bool reverse_sort;     /* -r Sort in downward alpha order.  */
