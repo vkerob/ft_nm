@@ -41,14 +41,14 @@ static int compare_symbols(const char *symA, const char *symB)
 	return (unsigned char)symA[i] - (unsigned char)symB[j];
 }
 
-static void sort_symbols_by_name(t_symbol_entry *symbols, size_t symbol_count)
+static void sort_symbols_by_name(t_symbol_entry *symbols, long symbol_count)
 {
 	if (!symbols || symbol_count <= 1)
 		return;
 
-	for (size_t i = 0; i < symbol_count - 1; i++)
+	for (long i = 0; i < symbol_count - 1; i++)
 	{
-		for (size_t j = 0; j < symbol_count - i - 1; j++)
+		for (long j = 0; j < symbol_count - i - 1; j++)
 		{
 			if (compare_symbols(symbols[j].name, symbols[j + 1].name) > 0)
 			{
@@ -84,14 +84,14 @@ void ft_putnbr_hex_fd(unsigned long adress, int fd, int width)
 		ft_putchar_fd(buffer[i], fd);
 }
 
-void print_ft_nm(t_symbol_entry *symbols, size_t symbol_count, int width)
+void print_ft_nm(t_symbol_entry *symbols, long symbol_count, int width)
 {
-	for (size_t i = 0; i < symbol_count; i++)
+	for (long i = 0; i < symbol_count; i++)
 	{
 		if (symbols[i].type_char == ' ')
 			continue;
 
-		if (symbols[i].value == NULL)
+		if ((symbols[i].value == NULL || symbols[i].type_char == 'U' || symbols[i].type_char == 'w') && symbols[i].type_char != 'T')
 		{
 			for (int j = 0; j < width; j++)
 				ft_putchar_fd(' ', 1);
@@ -102,10 +102,10 @@ void print_ft_nm(t_symbol_entry *symbols, size_t symbol_count, int width)
 	}
 }
 
-void print_reverse_alpha_sort(t_symbol_entry *symbols, size_t symbol_count,
+void print_reverse_alpha_sort(t_symbol_entry *symbols, long symbol_count,
 							  int width)
 {
-	for (size_t i = symbol_count; i > 0; i--)
+	for (long i = symbol_count; i > 0; i--)
 	{
 		if (symbols[i - 1].type_char == ' ')
 			continue;
@@ -120,7 +120,7 @@ void print_reverse_alpha_sort(t_symbol_entry *symbols, size_t symbol_count,
 	}
 }
 
-void process_symbols(t_symbol_entry **symbols, size_t symbol_count,
+void process_symbols(t_symbol_entry **symbols, long symbol_count,
 					 const char *file, int nb_files)
 {
 

@@ -10,21 +10,12 @@ static struct stat get_file_size(int fd, const char *file)
 		goto error;
 	}
 	if (file_stat.st_size == 0)
-	{
 		goto error;
-	}
 	if (file_stat.st_size < 0)
 	{
 		ft_putstr_fd("ft_nm: ", 2);
 		ft_putstr_fd((char *)file, 2);
 		ft_putstr_fd(": has negative size, probably it is too large\n", 2);
-		goto error;
-	}
-	if (file_stat.st_size < (long)sizeof(Elf64_Ehdr))
-	{
-		ft_putstr_fd("ft_nm: ", 2);
-		ft_putstr_fd((char *)file, 2);
-		ft_putstr_fd(": file format not recognized\n", 2);
 		goto error;
 	}
 	return file_stat;

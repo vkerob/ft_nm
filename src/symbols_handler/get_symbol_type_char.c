@@ -27,7 +27,7 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 	if (shndx == SHN_COMMON)
 		return 'C';
 	if (shndx == SHN_ABS)
-		return 'A';
+		return (bind == STB_LOCAL) ? 'a' : 'A';
 
 	// IFUNC
 	if (type == STT_GNU_IFUNC)
@@ -94,6 +94,7 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 char get_symbol_type_char_64(Elf64_Sym sym, Elf64_Shdr *sections)
 {
 	uint16_t shndx = sym.st_shndx;
+
 	unsigned char type = ELF64_ST_TYPE(
 		sym.st_info);
 	unsigned char bind = ELF64_ST_BIND(
@@ -116,6 +117,7 @@ char get_symbol_type_char_64(Elf64_Sym sym, Elf64_Shdr *sections)
 		return 'C';
 	if (shndx == SHN_ABS)
 		return 'A';
+	
 
 	if (type == STT_GNU_IFUNC)
 		return 'I';
