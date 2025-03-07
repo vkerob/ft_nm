@@ -1,13 +1,13 @@
 #include "../../includes/ft_nm.h"
 
-char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
+char get_symbol_type_char_32 (Elf32_Sym sym, Elf32_Shdr *sections)
 {
 	// get the section index of the symbol
 	uint16_t shndx = sym.st_shndx;
 	// get the type and binding of the symbol
-	unsigned char type = ELF32_ST_TYPE(
+	unsigned char type = ELF32_ST_TYPE (
 		sym.st_info); // get the type of the symbol (function, object, etc.)
-	unsigned char bind = ELF32_ST_BIND(
+	unsigned char bind = ELF32_ST_BIND (
 		sym.st_info); // get the binding of the symbol (local, global, etc.)
 
 	if (type == STT_FILE || type == STT_SECTION)
@@ -37,8 +37,9 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 	Elf32_Shdr section = sections[shndx]; // get the section of the symbol
 	Elf32_Word flags = section.sh_flags;  // get the flags of the section (read,
 										  // write, execute, etc.)
-	Elf32_Word type_section =
-		section.sh_type; // get the type of the section (progbits, nobits, etc.)
+	Elf32_Word type_section
+		= section
+			  .sh_type; // get the type of the section (progbits, nobits, etc.)
 
 	// SHT_NOBITS: section that occupies no space in the file
 	// SHT_PROGBITS: section that occupies space in the file
@@ -56,9 +57,9 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 		return (bind == STB_LOCAL) ? 'b' : 'B';
 
 	// d/D => SHT_DYNAMIC, SHT_INIT_ARRAY, SHT_FINI_ARRAY, etc.
-	if ((type_section == SHT_DYNAMIC || type_section == SHT_INIT_ARRAY ||
-		 type_section == SHT_FINI_ARRAY || type_section == SHT_PREINIT_ARRAY) &&
-		(flags & SHF_ALLOC))
+	if ((type_section == SHT_DYNAMIC || type_section == SHT_INIT_ARRAY
+		 || type_section == SHT_FINI_ARRAY || type_section == SHT_PREINIT_ARRAY)
+		&& (flags & SHF_ALLOC))
 	{
 		return (bind == STB_LOCAL) ? 'd' : 'D';
 	}
@@ -74,8 +75,8 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 	if (type_section == SHT_PROGBITS)
 	{
 		// data : ALLOC + WRITE + !EXEC
-		if ((flags & SHF_ALLOC) && (flags & SHF_WRITE) &&
-			!(flags & SHF_EXECINSTR))
+		if ((flags & SHF_ALLOC) && (flags & SHF_WRITE)
+			&& !(flags & SHF_EXECINSTR))
 			return (bind == STB_LOCAL) ? 'd' : 'D';
 
 		// code : ALLOC + EXEC
@@ -83,22 +84,20 @@ char get_symbol_type_char_32(Elf32_Sym sym, Elf32_Shdr *sections)
 			return (bind == STB_LOCAL) ? 't' : 'T';
 
 		// rodata : ALLOC + !WRITE + !EXEC
-		if ((flags & SHF_ALLOC) && !(flags & SHF_WRITE) &&
-			!(flags & SHF_EXECINSTR))
+		if ((flags & SHF_ALLOC) && !(flags & SHF_WRITE)
+			&& !(flags & SHF_EXECINSTR))
 			return (bind == STB_LOCAL) ? 'r' : 'R';
 	}
 
 	return '?';
 }
 
-char get_symbol_type_char_64(Elf64_Sym sym, Elf64_Shdr *sections)
+char get_symbol_type_char_64 (Elf64_Sym sym, Elf64_Shdr *sections)
 {
 	uint16_t shndx = sym.st_shndx;
 
-	unsigned char type = ELF64_ST_TYPE(
-		sym.st_info);
-	unsigned char bind = ELF64_ST_BIND(
-		sym.st_info);
+	unsigned char type = ELF64_ST_TYPE (sym.st_info);
+	unsigned char bind = ELF64_ST_BIND (sym.st_info);
 
 	if (type == STT_FILE || type == STT_SECTION)
 		return ' ';
@@ -117,21 +116,20 @@ char get_symbol_type_char_64(Elf64_Sym sym, Elf64_Shdr *sections)
 		return 'C';
 	if (shndx == SHN_ABS)
 		return 'A';
-	
 
 	if (type == STT_GNU_IFUNC)
 		return 'I';
 
-	Elf64_Shdr section = sections[shndx]; 
-	Elf64_Word flags = section.sh_flags;
+	Elf64_Shdr section		= sections[shndx];
+	Elf64_Word flags		= section.sh_flags;
 	Elf64_Word type_section = section.sh_type;
 
 	if (type_section == SHT_NOBITS && (flags & SHF_ALLOC))
 		return (bind == STB_LOCAL) ? 'b' : 'B';
 
-	if ((type_section == SHT_DYNAMIC || type_section == SHT_INIT_ARRAY ||
-		 type_section == SHT_FINI_ARRAY || type_section == SHT_PREINIT_ARRAY) &&
-		(flags & SHF_ALLOC))
+	if ((type_section == SHT_DYNAMIC || type_section == SHT_INIT_ARRAY
+		 || type_section == SHT_FINI_ARRAY || type_section == SHT_PREINIT_ARRAY)
+		&& (flags & SHF_ALLOC))
 	{
 		return (bind == STB_LOCAL) ? 'd' : 'D';
 	}
@@ -146,15 +144,15 @@ char get_symbol_type_char_64(Elf64_Sym sym, Elf64_Shdr *sections)
 
 	if (type_section == SHT_PROGBITS)
 	{
-		if ((flags & SHF_ALLOC) && (flags & SHF_WRITE) &&
-			!(flags & SHF_EXECINSTR))
+		if ((flags & SHF_ALLOC) && (flags & SHF_WRITE)
+			&& !(flags & SHF_EXECINSTR))
 			return (bind == STB_LOCAL) ? 'd' : 'D';
 
 		if ((flags & SHF_ALLOC) && (flags & SHF_EXECINSTR))
 			return (bind == STB_LOCAL) ? 't' : 'T';
 
-		if ((flags & SHF_ALLOC) && !(flags & SHF_WRITE) &&
-			!(flags & SHF_EXECINSTR))
+		if ((flags & SHF_ALLOC) && !(flags & SHF_WRITE)
+			&& !(flags & SHF_EXECINSTR))
 			return (bind == STB_LOCAL) ? 'r' : 'R';
 	}
 

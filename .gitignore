@@ -7,6 +7,6 @@ nm.txt
 libft.a
 settings.json
 binutils-2.41
-.clang-format
 ft_nm_output
 nm_output
+test_file

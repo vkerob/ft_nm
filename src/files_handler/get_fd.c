@@ -1,17 +1,17 @@
 #include "../../includes/ft_nm.h"
 
-bool get_fd(const char *file, int *fd)
+bool get_fd (const char *file, int *fd)
 {
-	*fd = open(file, O_RDONLY);
+	*fd = open (file, O_RDONLY);
 	if (*fd < 0)
 	{
 		if (errno == ENOENT)
 		{
-			ft_putstr_fd("ft_nm: « ", 2);
-			ft_putstr_fd((char *)file, 2);
-			ft_putstr_fd(" »: No such file\n", 2);
+			ft_putstr_fd ("ft_nm: « ", 2);
+			ft_putstr_fd ((char *)file, 2);
+			ft_putstr_fd (" »: No such file\n", 2);
 		}
-		close(*fd);
+		close (*fd);
 		return true;
 	}
 	return false;
