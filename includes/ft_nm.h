@@ -27,6 +27,19 @@ typedef struct s_symbol_entry
 	char		type_char; // Type (T, U, etc.)
 } t_symbol_entry;
 
+/* Error messages */
+# define ERR_FORMAT_NOT_RECOGNIZED ": file format not recognized\n"
+# define ERR_CORRUPT_STRING_TABLE " has a corrupt string table index - ignoring\n"
+# define ERR_FILE_TOO_SHORT ": file too short\n"
+# define ERR_NO_SYMBOLS ": no symbols\n"
+# define ERR_NO_FILE ": No such file or directory\n"
+# define ERR_NO_PERM ": Permission denied\n"
+# define ERR_NO_MEM ": Cannot allocate memory\n"
+# define ERR_GET_FILE_STATS "Error getting file stats"
+# define ERR_NEGATIVE_SIZE "has negative size, probably it is too large"
+# define ERR_NOT_REGULAR "is not an ordinary file"
+# define ERR_MAP_FAILED ": Error mapping file\n"
+
 bool display_file (const char *file, int argc);
 bool get_fd (const char *file, int *fd);
 bool get_file_stat (struct stat *file_stat, const char *file, int *fd);
