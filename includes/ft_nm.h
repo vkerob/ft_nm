@@ -54,9 +54,9 @@ bool save_symbols (void *file_map, t_symbol_entry **symbols, long *symbol_count,
 void process_symbols (t_symbol_entry **symbols, long symbol_count,
 					  const char *file, int argc);
 
-long get_symbols_count_64 (void *file_map, Elf64_Shdr *sections,
+size_t get_symbols_count_64 (void *file_map, Elf64_Shdr *sections,
 						   Elf64_Half sections_count, size_t file_size);
-long get_symbols_count_32 (void *file_map, Elf32_Shdr *sections,
+size_t get_symbols_count_32 (void *file_map, Elf32_Shdr *sections,
 						   Elf32_Half sections_count, size_t file_size);
 
 char get_symbol_type_char_64 (Elf64_Sym sym, Elf64_Shdr *sections);

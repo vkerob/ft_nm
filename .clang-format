@@ -4,7 +4,6 @@ IndentWidth: 4
 TabWidth: 4
 ColumnLimit: 80
 BreakBeforeBraces: Allman
-AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AllowShortIfStatementsOnASingleLine: false
 BreakAfterReturnType: Automatic

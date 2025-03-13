@@ -29,7 +29,10 @@ static bool check_header_64 (void *file_map, struct stat file_stat,
 	// check if the end of the section headers is within the file
 	if (header->e_shoff + sections_size > (size_t)file_stat.st_size)
 	{
-		ft_printf ("ft_nm: %s%s", file, ERR_FILE_TOO_SHORT);
+		ft_putstr_fd ("ft_nm: ", 2);
+		ft_putstr_fd ((char *)file, 2);
+		ft_putstr_fd (": ", 2);
+		ft_putstr_fd (ERR_FILE_TOO_SHORT, 2);
 		return cleanup_and_report (file, fd, file_map, ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
 
@@ -45,6 +48,22 @@ static bool check_header_64 (void *file_map, struct stat file_stat,
 	// sections
 	if (header->e_shstrndx >= header->e_shnum)
 		ft_printf ("ft_nm: warning: %s%s", file, ERR_CORRUPT_STRING_TABLE);
+
+	Elf64_Shdr *section_headers = (Elf64_Shdr *)(file_map + header->e_shoff);
+	Elf64_Shdr *shstrtab_section = &section_headers[header->e_shstrndx];
+
+	// check if the section header string table is a string table
+	if (shstrtab_section->sh_offset + shstrtab_section->sh_size > (size_t)file_stat.st_size || shstrtab_section->sh_offset <)
+		ft_printf ("ft_nm: %s%s", file, "ELF section name out of range");
+	if (shstrtab_section->sh_type != SHT_STRTAB)
+	{
+		ft_putstr_fd ("ft_nm: ", 2);
+		ft_putstr_fd ((char *)file, 2);
+		ft_putstr_fd (": has a corrupt string table index\n", 2);
+		return true;
+		
+	}
+	// check if the section header string table is within the file
 
 	return false;
 }
@@ -84,6 +103,20 @@ static bool check_header_32 (void *file_map, struct stat file_stat,
 
 	if (header->e_shstrndx >= header->e_shnum)
 		ft_printf ("ft_nm: warning: %s%s", file, ERR_CORRUPT_STRING_TABLE);
+
+	Elf32_Shdr *section_headers = (Elf32_Shdr *)(file_map + header->e_shoff);
+	Elf32_Shdr *shstrtab_section = &section_headers[header->e_shstrndx];
+
+	if (shstrtab_section->sh_type != SHT_STRTAB)
+	{
+		ft_printf ("ft_nm: %s%s", file, ERR_CORRUPT_STRING_TABLE);
+		return true;
+	}
+
+	if (shstrtab_section->sh_offset + shstrtab_section->sh_size > (size_t)file_stat.st_size) {
+		ft_printf ("ft_nm: %s%s", file, ERR_FILE_TOO_SHORT);
+		return true;
+	}
 
 	return false;
 }

@@ -1,7 +1,7 @@
 #include "../../includes/ft_nm.h"
 
 size_t get_count_64 (void *file_map, Elf64_Shdr *sections,
-					 Elf64_Shdr *target_section, Elf64_Shdr *strtab_section,
+					 Elf64_Shdr *symtab_section, Elf64_Shdr *strtab_section,
 					 size_t file_size)
 {
 	Elf64_Sym  *symtab;
@@ -10,15 +10,15 @@ size_t get_count_64 (void *file_map, Elf64_Shdr *sections,
 	size_t		valid_count = 0;
 
 	// check if the section index is not out of bounds
-	if (target_section->sh_offset + target_section->sh_size > file_size
+	if (symtab_section->sh_offset + symtab_section->sh_size > file_size
 		|| strtab_section->sh_offset + strtab_section->sh_size > file_size)
-		return -1;
+		return 0;
 
 	// get the symbol table section
-	symtab = (Elf64_Sym *)((char *)file_map + target_section->sh_offset);
+	symtab = (Elf64_Sym *)((char *)file_map + symtab_section->sh_offset);
 	// get the string table section associated with the target section
-	strtab		  = (const char *)file_map + strtab_section->sh_offset;
-	total_symbols = target_section->sh_size / sizeof (Elf64_Sym);
+	strtab = (const char *)file_map + strtab_section->sh_offset;
+	total_symbols = symtab_section->sh_size / sizeof (Elf64_Sym);
 
 	for (size_t s = 0; s < total_symbols; s++)
 	{
@@ -34,7 +34,7 @@ size_t get_count_64 (void *file_map, Elf64_Shdr *sections,
 }
 
 size_t get_count_32 (void *file_map, Elf32_Shdr *sections,
-					 Elf32_Shdr *target_section, Elf32_Shdr *strtab_section,
+					 Elf32_Shdr *symtab_section, Elf32_Shdr *strtab_section,
 					 size_t file_size)
 {
 	Elf32_Sym  *symtab;
@@ -42,13 +42,13 @@ size_t get_count_32 (void *file_map, Elf32_Shdr *sections,
 	size_t		total_symbols;
 	size_t		valid_count = 0;
 
-	if (target_section->sh_offset + target_section->sh_size > file_size
+	if (symtab_section->sh_offset + symtab_section->sh_size > file_size
 		|| strtab_section->sh_offset + strtab_section->sh_size > file_size)
-		return -1;
+		return 0;
 
-	symtab		  = (Elf32_Sym *)((char *)file_map + target_section->sh_offset);
+	symtab		  = (Elf32_Sym *)((char *)file_map + symtab_section->sh_offset);
 	strtab		  = (const char *)file_map + strtab_section->sh_offset;
-	total_symbols = target_section->sh_size / sizeof (Elf32_Sym);
+	total_symbols = symtab_section->sh_size / sizeof (Elf32_Sym);
 	valid_count	  = 0;
 
 	for (size_t s = 0; s < total_symbols; s++)
@@ -63,13 +63,12 @@ size_t get_count_32 (void *file_map, Elf32_Shdr *sections,
 	return valid_count;
 }
 
-long get_symbols_count_64 (void *file_map, Elf64_Shdr *sections,
+size_t get_symbols_count_64 (void *file_map, Elf64_Shdr *sections,
 						   Elf64_Half sections_count, size_t file_size)
 {
-	Elf64_Shdr *target_section = NULL; // symtab
+	Elf64_Shdr *symtab_section = NULL;
 	Elf64_Shdr *strtab_section = NULL;
-	long		symbols_count  = 0;
-	long		symbol_count   = 0;
+	size_t		symbol_count   = 0;
 
 	for (int i = 0; i < sections_count; i++)
 	{
@@ -77,45 +76,47 @@ long get_symbols_count_64 (void *file_map, Elf64_Shdr *sections,
 		{
 			// check if the section index is not out of bounds
 			if (sections[i].sh_link >= sections_count)
-				return -1;
+				break;
 
-			target_section = &sections[i];
+			symtab_section = &sections[i];
 			strtab_section
-				= &sections[target_section->sh_link]; // sh_link is the index of
+				= &sections[symtab_section->sh_link]; // sh_link is the index of
 													  // the string table
 													  // section
-			symbol_count = get_count_64 (file_map, sections, target_section,
+			symbol_count = get_count_64 (file_map, sections, symtab_section,
 										 strtab_section, file_size);
-			if (symbol_count == -1)
-				return -1;
-			symbols_count += symbol_count;
+			if (symbol_count == 0)
+				break;
+			return symbol_count;
+			
 		}
 	}
-	return symbols_count;
+	return 0;
 }
 
-long get_symbols_count_32 (void *file_map, Elf32_Shdr *sections,
+size_t get_symbols_count_32 (void *file_map, Elf32_Shdr *sections,
 						   Elf32_Half sections_count, size_t file_size)
 {
-	Elf32_Shdr *target_section = NULL;
+	Elf32_Shdr *symtab_section = NULL;
 	Elf32_Shdr *strtab_section = NULL;
-	long		symbols_count  = 0;
-	long		symbol_count   = 0;
+	size_t		symbol_count   = 0;
 
 	for (int i = 0; i < sections_count; i++)
 	{
 		if (sections[i].sh_type == SHT_SYMTAB)
 		{
 			if (sections[i].sh_link >= sections_count)
-				return -1;
-			target_section = &sections[i];
-			strtab_section = &sections[target_section->sh_link];
-			symbol_count   = get_count_32 (file_map, sections, target_section,
-										   strtab_section, file_size);
-			if (symbol_count == -1)
-				return -1;
-			symbols_count += symbol_count;
+				break;
+
+			symtab_section = &sections[i];
+			strtab_section = &sections[symtab_section->sh_link];
+			symbol_count = get_count_32 (file_map, sections, symtab_section,
+										 strtab_section, file_size);
+			if (symbol_count == 0)
+				break;
+
+			return symbol_count;			
 		}
 	}
-	return symbols_count;
+	return 0;
 }
