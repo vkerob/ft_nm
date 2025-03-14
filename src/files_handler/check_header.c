@@ -28,9 +28,11 @@ static bool check_header_64 (void *file_map, struct stat file_stat,
 
 	// Check if the start of the section headers is within the file
 	if (header->e_shoff >= file_size)
+	{
+		print_error_message ("ft_nm: ", file, ERR_FILE_TOO_SHORT);
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
-
+	}
 	size_t sections_size = header->e_shnum * sizeof (Elf64_Shdr);
 	// Check if the end of the section headers is within the file
 	if (header->e_shoff + sections_size > file_size)
@@ -105,13 +107,13 @@ static bool check_header_32 (void *file_map, struct stat file_stat,
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	if (header->e_shoff >= file_size)
+	{
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
-
+	}
 	size_t sections_size = header->e_shnum * sizeof (Elf32_Shdr);
 	if (header->e_shoff + sections_size > file_size)
 	{
-		ft_printf ("ft_nm: %s%s", file, ERR_FILE_TOO_SHORT);
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
@@ -123,7 +125,8 @@ static bool check_header_32 (void *file_map, struct stat file_stat,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
 	if (header->e_shstrndx >= header->e_shnum)
-		ft_printf ("ft_nm: warning: %s%s", file, ERR_CORRUPT_STRING_TABLE);
+		print_error_message ("ft_nm: warning: ", file,
+							 ERR_CORRUPT_STRING_TABLE);
 	Elf32_Shdr *section_headers
 		= (Elf32_Shdr *)((char *)file_map + header->e_shoff);
 
