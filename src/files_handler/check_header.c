@@ -59,6 +59,7 @@ static bool check_header_64 (void *file_map, struct stat file_stat,
 	{
 		print_error_message ("ft_nm: warning: ", file,
 							 ERR_CORRUPT_STRING_TABLE);
+		cleanup_and_report (file, fd, file_map, "", page_size);
 		return false;
 	}
 	Elf64_Shdr *shstrtab_header = &section_headers[header->e_shstrndx];
@@ -69,6 +70,7 @@ static bool check_header_64 (void *file_map, struct stat file_stat,
 		print_error_message ("ft_nm: ", file, ERR_SECTION_NAME_OUT_OF_RANGE);
 		print_error_message ("ft_nm: warning: ", file,
 							 ERR_CORRUPT_STRING_TABLE);
+		cleanup_and_report (file, fd, file_map, "", page_size);
 		return false;
 	}
 
@@ -78,7 +80,8 @@ static bool check_header_64 (void *file_map, struct stat file_stat,
 		|| shstrtab_header->sh_offset + shstrtab_header->sh_size > file_size)
 	{
 		print_error_message ("ft_nm: ", file, ERR_SECTION_NAME_OUT_OF_RANGE);
-		return true;
+		return cleanup_and_report (file, fd, file_map,
+								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
 
 	return false;
@@ -123,16 +126,36 @@ static bool check_header_32 (void *file_map, struct stat file_stat,
 		ft_printf ("ft_nm: warning: %s%s", file, ERR_CORRUPT_STRING_TABLE);
 	Elf32_Shdr *section_headers
 		= (Elf32_Shdr *)((char *)file_map + header->e_shoff);
-	Elf32_Shdr *shstrtab_section = &section_headers[header->e_shstrndx];
-	if (shstrtab_section->sh_type != SHT_STRTAB)
+
+	// Check if the section header string table index is within the number of
+	// sections
+	if (header->e_shstrndx >= header->e_shnum)
 	{
-		ft_printf ("ft_nm: %s%s", file, ERR_CORRUPT_STRING_TABLE);
-		return true;
+		print_error_message ("ft_nm: warning: ", file,
+							 ERR_CORRUPT_STRING_TABLE);
+		cleanup_and_report (file, fd, file_map, "", page_size);
+		return false;
 	}
-	if (shstrtab_section->sh_offset + shstrtab_section->sh_size > file_size)
+	Elf32_Shdr *shstrtab_header = &section_headers[header->e_shstrndx];
+
+	// Check if the section header string table is of type SHT_STRTAB
+	if (shstrtab_header->sh_type != SHT_STRTAB)
 	{
-		ft_printf ("ft_nm: %s%s", file, ERR_FILE_TOO_SHORT);
-		return true;
+		print_error_message ("ft_nm: ", file, ERR_SECTION_NAME_OUT_OF_RANGE);
+		print_error_message ("ft_nm: warning: ", file,
+							 ERR_CORRUPT_STRING_TABLE);
+		cleanup_and_report (file, fd, file_map, "", page_size);
+		return false;
+	}
+
+	// Check if the section header string table is within the file
+	if (shstrtab_header->sh_offset >= file_size
+		|| shstrtab_header->sh_size >= file_size
+		|| shstrtab_header->sh_offset + shstrtab_header->sh_size > file_size)
+	{
+		print_error_message ("ft_nm: ", file, ERR_SECTION_NAME_OUT_OF_RANGE);
+		return cleanup_and_report (file, fd, file_map,
+								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
 	return false;
 }
