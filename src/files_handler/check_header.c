@@ -1,136 +1,139 @@
 #include "../../includes/ft_nm.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 static bool check_header_64 (void *file_map, struct stat file_stat,
 							 const char *file, int fd)
 {
 	Elf64_Ehdr *header = (Elf64_Ehdr *)file_map;
+	size_t		file_size = (size_t)file_stat.st_size;
 
-	// check file type (ET_EXEC, ET_DYN, ET_REL are the only valid types see
-	// subject)
+	// Check file type (ET_EXEC, ET_DYN, ET_REL are the only valid types)
 	if (header->e_type != ET_EXEC && header->e_type != ET_DYN
 		&& header->e_type != ET_REL)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
-	// check endianness
+	// Check endianness
 	if (header->e_ident[EI_DATA] != ELFDATA2LSB
 		&& header->e_ident[EI_DATA] != ELFDATA2MSB)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
-	// check version
+	// Check version
 	if (header->e_ident[EI_VERSION] != EV_CURRENT
 		|| header->e_version != EV_CURRENT)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
-	// check if the start of the section headers is within the file
-	if (header->e_shoff >= (size_t)file_stat.st_size)
+	// Check if the start of the section headers is within the file
+	if (header->e_shoff >= file_size)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
 	size_t sections_size = header->e_shnum * sizeof (Elf64_Shdr);
-	// check if the end of the section headers is within the file
-	if (header->e_shoff + sections_size > (size_t)file_stat.st_size)
+	// Check if the end of the section headers is within the file
+	if (header->e_shoff + sections_size > file_size)
 	{
-		ft_putstr_fd ("ft_nm: ", 2);
-		ft_putstr_fd ((char *)file, 2);
-		ft_putstr_fd (": ", 2);
-		ft_putstr_fd (ERR_FILE_TOO_SHORT, 2);
-		return cleanup_and_report (file, fd, file_map, ERR_FORMAT_NOT_RECOGNIZED, page_size);
+		print_error_message ("ft_nm: ", file, ERR_FILE_TOO_SHORT);
+		return cleanup_and_report (file, fd, file_map,
+								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
 
-	// check if the section header entry size is the size of the Elf64_Shdr
+	// Check if the section header entry size matches Elf64_Shdr
 	if (header->e_shentsize != sizeof (Elf64_Shdr))
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
-	// check if there are any sections
+	// Check if there is at least one section
 	if (header->e_shnum == 0)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
-	// check if the section header string table index is within the number of
+	Elf64_Shdr *section_headers
+		= (Elf64_Shdr *)((char *)file_map + header->e_shoff);
+
+	// Check if the section header string table index is within the number of
 	// sections
 	if (header->e_shstrndx >= header->e_shnum)
-		ft_printf ("ft_nm: warning: %s%s", file, ERR_CORRUPT_STRING_TABLE);
-
-	Elf64_Shdr *section_headers = (Elf64_Shdr *)(file_map + header->e_shoff);
-	Elf64_Shdr *shstrtab_section = &section_headers[header->e_shstrndx];
-
-	// check if the section header string table is a string table
-	if (shstrtab_section->sh_offset + shstrtab_section->sh_size > (size_t)file_stat.st_size || shstrtab_section->sh_offset <)
-		ft_printf ("ft_nm: %s%s", file, "ELF section name out of range");
-	if (shstrtab_section->sh_type != SHT_STRTAB)
 	{
-		ft_putstr_fd ("ft_nm: ", 2);
-		ft_putstr_fd ((char *)file, 2);
-		ft_putstr_fd (": has a corrupt string table index\n", 2);
-		return true;
-		
+		print_error_message ("ft_nm: warning: ", file,
+							 ERR_CORRUPT_STRING_TABLE);
+		return false;
 	}
-	// check if the section header string table is within the file
+	Elf64_Shdr *shstrtab_header = &section_headers[header->e_shstrndx];
+
+	// Check if the section header string table is of type SHT_STRTAB
+	if (shstrtab_header->sh_type != SHT_STRTAB)
+	{
+		print_error_message ("ft_nm: ", file, ERR_SECTION_NAME_OUT_OF_RANGE);
+		print_error_message ("ft_nm: warning: ", file,
+							 ERR_CORRUPT_STRING_TABLE);
+		return false;
+	}
+
+	// Check if the section header string table is within the file
+	if (shstrtab_header->sh_offset >= file_size
+		|| shstrtab_header->sh_size >= file_size
+		|| shstrtab_header->sh_offset + shstrtab_header->sh_size > file_size)
+	{
+		print_error_message ("ft_nm: ", file, ERR_SECTION_NAME_OUT_OF_RANGE);
+		return true;
+	}
 
 	return false;
 }
-
 static bool check_header_32 (void *file_map, struct stat file_stat,
 							 const char *file, int fd)
 {
-	Elf32_Ehdr *header = (Elf32_Ehdr *)(file_map);
+	Elf32_Ehdr *header = (Elf32_Ehdr *)file_map;
+	size_t		file_size = (size_t)file_stat.st_size;
 
 	if (header->e_type != ET_EXEC && header->e_type != ET_DYN
 		&& header->e_type != ET_REL)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
-
 	if (header->e_ident[EI_DATA] != ELFDATA2LSB
 		&& header->e_ident[EI_DATA] != ELFDATA2MSB)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
-
 	if (header->e_ident[EI_VERSION] != EV_CURRENT
 		|| header->e_version != EV_CURRENT)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
-
-	if (header->e_shoff >= (size_t)file_stat.st_size)
+	if (header->e_shoff >= file_size)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
 	size_t sections_size = header->e_shnum * sizeof (Elf32_Shdr);
-	if (header->e_shoff + sections_size > (size_t)file_stat.st_size)
+	if (header->e_shoff + sections_size > file_size)
 	{
 		ft_printf ("ft_nm: %s%s", file, ERR_FILE_TOO_SHORT);
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
-
 	if (header->e_shentsize != sizeof (Elf32_Shdr))
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
-
 	if (header->e_shnum == 0)
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 
 	if (header->e_shstrndx >= header->e_shnum)
 		ft_printf ("ft_nm: warning: %s%s", file, ERR_CORRUPT_STRING_TABLE);
-
-	Elf32_Shdr *section_headers = (Elf32_Shdr *)(file_map + header->e_shoff);
+	Elf32_Shdr *section_headers
+		= (Elf32_Shdr *)((char *)file_map + header->e_shoff);
 	Elf32_Shdr *shstrtab_section = &section_headers[header->e_shstrndx];
-
 	if (shstrtab_section->sh_type != SHT_STRTAB)
 	{
 		ft_printf ("ft_nm: %s%s", file, ERR_CORRUPT_STRING_TABLE);
 		return true;
 	}
-
-	if (shstrtab_section->sh_offset + shstrtab_section->sh_size > (size_t)file_stat.st_size) {
+	if (shstrtab_section->sh_offset + shstrtab_section->sh_size > file_size)
+	{
 		ft_printf ("ft_nm: %s%s", file, ERR_FILE_TOO_SHORT);
 		return true;
 	}
-
 	return false;
 }
 

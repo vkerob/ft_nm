@@ -1,6 +1,6 @@
 CC = clang
 
-CFLAGS = -Wall -Wextra -Werror -g -m64
+CFLAGS = -Wall -Wextra -Werror -g
 
 NAME = libft.a
 

@@ -1,6 +1,6 @@
 #include "../../includes/ft_nm.h"
 
-char get_symbol_type_char_32 (Elf32_Sym sym, Elf32_Shdr *sections)
+char get_symbol_type_char_32 (Elf32_Sym sym, Elf32_Shdr *section_headers)
 {
 	// get the section index of the symbol
 	uint16_t shndx = sym.st_shndx;
@@ -34,9 +34,10 @@ char get_symbol_type_char_32 (Elf32_Sym sym, Elf32_Shdr *sections)
 		return 'I';
 
 	// get the section of the symbol
-	Elf32_Shdr section = sections[shndx]; // get the section of the symbol
-	Elf32_Word flags = section.sh_flags;  // get the flags of the section (read,
-										  // write, execute, etc.)
+	Elf32_Shdr section
+		= section_headers[shndx];		 // get the section of the symbol
+	Elf32_Word flags = section.sh_flags; // get the flags of the section (read,
+										 // write, execute, etc.)
 	Elf32_Word type_section
 		= section
 			  .sh_type; // get the type of the section (progbits, nobits, etc.)
@@ -92,7 +93,7 @@ char get_symbol_type_char_32 (Elf32_Sym sym, Elf32_Shdr *sections)
 	return '?';
 }
 
-char get_symbol_type_char_64 (Elf64_Sym sym, Elf64_Shdr *sections)
+char get_symbol_type_char_64 (Elf64_Sym sym, Elf64_Shdr *section_headers)
 {
 	uint16_t shndx = sym.st_shndx;
 
@@ -120,8 +121,8 @@ char get_symbol_type_char_64 (Elf64_Sym sym, Elf64_Shdr *sections)
 	if (type == STT_GNU_IFUNC)
 		return 'I';
 
-	Elf64_Shdr section		= sections[shndx];
-	Elf64_Word flags		= section.sh_flags;
+	Elf64_Shdr section = section_headers[shndx];
+	Elf64_Word flags = section.sh_flags;
 	Elf64_Word type_section = section.sh_type;
 
 	if (type_section == SHT_NOBITS && (flags & SHF_ALLOC))

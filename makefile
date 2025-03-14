@@ -1,7 +1,7 @@
 # Variables générales
 CC = clang
 
-CFLAGS = -Wall -Wextra -Werror -g -m64
+CFLAGS = -Wall -Wextra -Werror -g
 
 # Répertoires
 LIBFT_DIR = ./libft
@@ -19,7 +19,7 @@ SRC = ft_nm.c \
 		display_file.c \
 		files_handler/get_fd.c \
 		files_handler/get_file_stat.c \
-		files_handler/cleanup_and_report.c \
+		files_handler/error.c \
 		files_handler/check_header.c \
 		files_handler/get_file_map.c \
 		symbols_handler/save_symbols.c \

@@ -5,7 +5,7 @@ bool display_file (const char *file, int nb_files)
 	int				fd;
 	struct stat		file_stat;
 	void		   *file_map;
-	t_symbol_entry *symbols		 = NULL;
+	t_symbol_entry *symbols = NULL;
 	long			symbol_count = 0;
 
 	if (get_fd (file, &fd))
