@@ -108,12 +108,14 @@ static bool check_header_32 (void *file_map, struct stat file_stat,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	if (header->e_shoff >= file_size)
 	{
+		print_error_message ("ft_nm: ", file, ERR_FILE_TOO_SHORT);
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
 	size_t sections_size = header->e_shnum * sizeof (Elf32_Shdr);
 	if (header->e_shoff + sections_size > file_size)
 	{
+		print_error_message ("ft_nm: ", file, ERR_FILE_TOO_SHORT);
 		return cleanup_and_report (file, fd, file_map,
 								   ERR_FORMAT_NOT_RECOGNIZED, page_size);
 	}
