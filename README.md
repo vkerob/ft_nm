@@ -5,7 +5,7 @@ It allows displaying the symbol table of an executable, object file (.o), or sha
 
 ---
 
-## 🚀 Objective
+## Objective
 
 The goal of this project is to understand and manipulate the structure of ELF files (Executable and Linkable Format), by:
 
@@ -18,7 +18,7 @@ This project also requires strict error handling: no segmentation faults, bus er
 
 ---
 
-## ⚙️ Compilation
+## Compilation
 
 To build the project, simply run:
 
@@ -28,7 +28,7 @@ make
 
 This will generate the ft_nm binary.
 
-## 🧠 Usage
+## Usage
 
 To use the ft_nm command, you can run it with the following syntax:
 
@@ -42,7 +42,7 @@ If no file is provided, ft_nm will attempt to analyze a.out by default.
 
 ---
 
-## ✨ Bonus Options
+## Bonus Options
 
 These options are part of the bonus section of the project.  
 All are implemented except for -a.
@@ -56,7 +56,7 @@ The -a option (which includes debug symbols) is not implemented.
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 - files_handler/ → File handling, memory mapping, ELF verification.
 - symbols_handler/ → Symbol extraction and analysis.
@@ -65,7 +65,7 @@ The -a option (which includes debug symbols) is not implemented.
 
 ---
 
-## 🔍 Example
+## Example
 
 ./ft_nm /bin/ls
 
@@ -73,7 +73,7 @@ This will display the list of symbols along with their types and addresses if av
 
 ---
 
-## 📜 Important Notes
+## Important Notes
 
 - The subject PDF is included in this repository.  
 It is crucial to read it to fully understand the constraints and the reasoning behind certain design decisions.
@@ -85,9 +85,20 @@ This project reflects the design I chose, based on how I mentally visualized the
 
 ---
 
-## 📚 Useful Documentation
+## ELF Executable Structure
 
-- [man nm](https://man7.org/linux/man-pages/man1/nm.1.html)  
-- [ELF format (Wikipedia)](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format)  
-- [man elf (ELF file format manual)](https://man7.org/linux/man-pages/man5/elf.5.html)
-- [GNU binutils nm implementation (source code)](https://sourceware.org/git/?p=binutils-gdb.git;a=tree;f=binutils;hb=HEAD)
+To better understand the ELF format and executable structure, here are some useful resources:
+
+- [Oswalt's explanations](https://oswalt.dev/2020/11/anatomy-of-a-binary-executable/)
+
+### Visual Diagram of ELF Structure
+
+The following diagram (created by Ange Albertini) perfectly illustrates the structure of an ELF file:
+
+![ELF Structure Diagram](ELF_Executable_and_Linkable_Format_diagram_by_Ange_Albertini.png)
+
+*This diagram shows the organization of different sections of an ELF file, including the ELF header, program headers, sections, and symbol table.*
+
+### Links to Original Diagram
+
+- [ELF Diagram by Ange Albertini](https://commons.wikimedia.org/wiki/File%3AELF_Executable_and_Linkable_Format_diagram_by_Ange_Albertini.png)
