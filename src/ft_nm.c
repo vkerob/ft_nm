@@ -3,10 +3,10 @@
 int	 page_size;
 bool is_64;
 
-bool external_only	= false; /* -g Print external symbols only.  */
+bool external_only = false;	 /* -g Print external symbols only.  */
 bool undefined_only = false; /* -u Print undefined symbols only.  */
-bool reverse_sort	= false; /* -r Sort in downward(alpha or numeric) order.  */
-bool no_sort		= false; /* -p Don't sort; print syms in order found.  */
+bool reverse_sort = false;	 /* -r Sort in downward(alpha or numeric) order.  */
+bool no_sort = false;		 /* -p Don't sort; print syms in order found.  */
 
 bool is_handle_option (char c)
 {
@@ -15,7 +15,7 @@ bool is_handle_option (char c)
 
 int set_options (int argc, const char **argv)
 {
-	int i		 = 1;
+	int i = 1;
 	int nb_files = argc - 1;
 
 	while (i < argc)
@@ -31,13 +31,13 @@ int set_options (int argc, const char **argv)
 				else if (argv[i][j] == 'p')
 				{
 					reverse_sort = false;
-					no_sort		 = true;
+					no_sort = true;
 				}
 				else if (argv[i][j] == 'r' && !no_sort)
 					reverse_sort = true;
 				else if (argv[i][j] == 'u')
 				{
-					external_only  = false;
+					external_only = false;
 					undefined_only = true;
 				}
 				else if (!is_handle_option (argv[i][j]))
@@ -82,7 +82,7 @@ char **get_files (int argc, const char **argv, int nb_files)
 
 int main (int argc, const char **argv)
 {
-	int	   i	  = 1;
+	int	   i = 1;
 	bool   retval = true;
 	int	   nb_files;
 	char **files;

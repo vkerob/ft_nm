@@ -10,3 +10,6 @@ binutils-2.41
 ft_nm_output
 nm_output
 test_file
+compile_commands.json
+.cache/
+.devcontainer/
