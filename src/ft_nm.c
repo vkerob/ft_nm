@@ -82,12 +82,9 @@ char **get_files (int argc, const char **argv, int nb_files)
 
 int main (int argc, const char **argv)
 {
-	int	   i = 1;
-	bool   retval = true;
+	int	   i;
 	int	   nb_files;
 	char **files;
-
-	page_size = getpagesize ();
 
 	nb_files = set_options (argc, argv);
 
@@ -104,5 +101,5 @@ int main (int argc, const char **argv)
 	}
 
 	free (files);
-	return retval;
+	return false;
 }

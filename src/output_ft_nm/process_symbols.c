@@ -54,8 +54,8 @@ static void sort_symbols_by_name (t_symbol_entry *symbols, long symbol_count)
 			{
 				// Échange
 				t_symbol_entry tmp = symbols[j];
-				symbols[j]		   = symbols[j + 1];
-				symbols[j + 1]	   = tmp;
+				symbols[j] = symbols[j + 1];
+				symbols[j + 1] = tmp;
 			}
 		}
 	}
@@ -130,7 +130,7 @@ void process_symbols (t_symbol_entry **symbols, long symbol_count,
 	// sort the symbols by name alphabetically
 	if (no_sort == false)
 		sort_symbols_by_name (*symbols, symbol_count);
-	if (nb_files > 2)
+	if (nb_files >= 2)
 		printf ("\n%s:\n", file);
 	if (reverse_sort)
 		print_reverse_alpha_sort (*symbols, symbol_count, width);

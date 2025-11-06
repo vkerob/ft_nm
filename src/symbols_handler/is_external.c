@@ -2,8 +2,8 @@
 
 bool is_external_32 (Elf32_Sym sym)
 {
-	unsigned char bind	= ELF32_ST_BIND (sym.st_info);
-	unsigned char type	= ELF32_ST_TYPE (sym.st_info);
+	unsigned char bind = ELF32_ST_BIND (sym.st_info);
+	unsigned char type = ELF32_ST_TYPE (sym.st_info);
 	uint16_t	  shndx = sym.st_shndx;
 
 	if (bind == STB_LOCAL)
@@ -26,8 +26,8 @@ bool is_external_32 (Elf32_Sym sym)
 
 bool is_external_64 (Elf64_Sym sym)
 {
-	unsigned char bind	= ELF64_ST_BIND (sym.st_info);
-	unsigned char type	= ELF64_ST_TYPE (sym.st_info);
+	unsigned char bind = ELF64_ST_BIND (sym.st_info);
+	unsigned char type = ELF64_ST_TYPE (sym.st_info);
 	uint16_t	  shndx = sym.st_shndx;
 
 	if (bind == STB_LOCAL)

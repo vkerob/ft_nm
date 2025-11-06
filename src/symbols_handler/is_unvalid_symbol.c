@@ -3,7 +3,7 @@
 bool is_unvalid_symbol_64 (Elf64_Sym sym, const char *strtab,
 						   Elf64_Shdr *sections)
 {
-	const char *sym_name  = strtab + sym.st_name;
+	const char *sym_name = strtab + sym.st_name;
 	char		type_char = get_symbol_type_char_64 (sym, sections);
 
 	if (*sym_name == '\0' && type_char != 'a')
@@ -21,7 +21,7 @@ bool is_unvalid_symbol_64 (Elf64_Sym sym, const char *strtab,
 bool is_unvalid_symbol_32 (Elf32_Sym sym, const char *strtab,
 						   Elf32_Shdr *sections)
 {
-	const char *sym_name  = strtab + sym.st_name;
+	const char *sym_name = strtab + sym.st_name;
 	char		type_char = get_symbol_type_char_32 (sym, sections);
 
 	if (*sym_name == '\0' && type_char != 'a')
